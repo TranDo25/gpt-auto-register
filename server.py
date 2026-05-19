@@ -230,7 +230,7 @@ def get_accounts():
 
 if __name__ == '__main__':
     from waitress import serve
-    print("🌐 Web Server started at http://localhost:5000")
+    print("🌐 Web Server started at http://localhost:8000")
     # 使用生产级服务器 Waitress
     # threads=6 支持并发：前端页面 + API轮询 + MJPEG流 + 后台任务
-    serve(app, host='0.0.0.0', port=5000, threads=6)
+    serve(app, host='0.0.0.0', port=8000, threads=6)

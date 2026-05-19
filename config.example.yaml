@@ -1,69 +1,69 @@
 # ==========================================
-# ChatGPT 自动注册工具 - 配置文件模板
-# 使用说明:
-# 1. 复制此文件为 config.yaml
-# 2. 修改 config.yaml 中的配置
+# Công cụ Tự động Đăng ký ChatGPT - File cấu hình mẫu
+# Hướng dẫn sử dụng:
+# 1. Sao chép file này thành config.yaml
+# 2. Chỉnh sửa cấu hình trong config.yaml
 # ==========================================
 
-# 注册配置
+# Cấu hình đăng ký
 registration:
-  total_accounts: 1      # 批量注册的账号数量
-  min_age: 20            # 随机生日的最小年龄
-  max_age: 40            # 随机生日的最大年龄
+  total_accounts: 1      # Số lượng tài khoản đăng ký hàng loạt
+  min_age: 20            # Tuổi tối thiểu cho ngày sinh ngẫu nhiên
+  max_age: 40            # Tuổi tối đa cho ngày sinh ngẫu nhiên
 
-# 临时邮箱服务 (Cloudflare Temp Email)
-# 部署教程: https://github.com/dreamhunter2333/cloudflare_temp_email
+# Dịch vụ Email tạm thời (Cloudflare Temp Email)
+# Hướng dẫn triển khai: https://github.com/dreamhunter2333/cloudflare_temp_email
 email:
-  # Cloudflare Worker 地址 (必须修改)
+  # Địa chỉ Cloudflare Worker (Bắt buộc phải sửa)
   worker_url: "https://your-worker-name.your-subdomain.workers.dev"
-  
-  # 你的自定义域名 (必须修改)
+
+  # Tên miền tùy chỉnh của bạn (Bắt buộc phải sửa)
   domain: "your-custom-domain.com"
-  
-  # 邮箱前缀长度
+
+  # Độ dài tiền tố email
   prefix_length: 10
-  
-  # 验证邮件相关
-  wait_timeout: 120     # 等待验证邮件的最大超时时间(秒)
-  poll_interval: 3      # 轮询检查邮件的间隔(秒)
-  
-  # Worker 的访问密码 (必须修改)
+
+  # Cài đặt email xác thực
+  wait_timeout: 120     # Thời gian chờ tối đa cho email xác thực (giây)
+  poll_interval: 3      # Khoảng thời gian giữa các lần kiểm tra email (giây)
+
+  # Mật khẩu truy cập Worker (Bắt buộc phải sửa)
   admin_password: "your-worker-admin-password"
 
-# 浏览器自动化配置
+# Cấu hình tự động hóa trình duyệt
 browser:
-  max_wait_time: 600    # 全局最大等待时间
-  short_wait_time: 120  # 短任务等待时间
+  max_wait_time: 600    # Thời gian chờ tối đa toàn cục
+  short_wait_time: 120  # Thời gian chờ cho tác vụ ngắn
   user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# 账号密码规则
+# Quy tắc mật khẩu tài khoản
 password:
   length: 16
-  # 密码字符集 (包含大小写字母和数字)
+  # Bộ ký tự mật khẩu (gồm chữ hoa, chữ thường và số)
   charset: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-# 错误重试策略
+# Chiến lược thử lại khi gặp lỗi
 retry:
-  http_max_retries: 5       # HTTP 请求最大重试次数
-  http_timeout: 30          # HTTP 请求超时时间
-  error_page_max_retries: 5 # 遇到错误页面的最大刷新重试次数
-  button_click_max_retries: 3 # 按钮点击最大重试次数
+  http_max_retries: 5       # Số lần thử lại tối đa cho yêu cầu HTTP
+  http_timeout: 30          # Thời gian chờ tối đa của yêu cầu HTTP
+  error_page_max_retries: 5 # Số lần thử lại tối đa khi gặp trang lỗi
+  button_click_max_retries: 3 # Số lần thử lại tối đa khi nhấn nút
 
-# 批量注册间隔
+# Khoảng cách giữa các lần đăng ký hàng loạt
 batch:
-  interval_min: 5  # 最小间隔(秒)
-  interval_max: 15 # 最大间隔(秒)
+  interval_min: 5  # Khoảng cách tối thiểu (giây)
+  interval_max: 15 # Khoảng cách tối đa (giây)
 
-# 支付信息 (用于自动绑定 Plus 试用)
-# 警告: 请勿在此文件中填入真实的信用卡信息，除非此文件不被公开
+# Thông tin thanh toán (dùng để tự động đăng ký dùng thử Plus)
+# Cảnh báo: Không điền thông tin thẻ tín dụng thật vào file này, trừ khi file không được chia sẻ công khai
 payment:
   credit_card:
-    number: "YOUR_CREDIT_CARD_NUMBER" # 信用卡号
-    expiry: "MMYY"                    # 有效期 (MMYY 格式，如 1225)
-    expiry_month: "12"                # 有效期月
-    expiry_year: "2025"               # 有效期年
-    cvc: "123"                        # 安全码
+    number: "YOUR_CREDIT_CARD_NUMBER" # Số thẻ tín dụng
+    expiry: "MMYY"                    # Ngày hết hạn (định dạng MMYY, ví dụ: 1225)
+    expiry_month: "12"                # Tháng hết hạn
+    expiry_year: "2025"               # Năm hết hạn
+    cvc: "123"                        # Mã bảo mật
 
-# 文件路径配置
+# Cấu hình đường dẫn file
 files:
-  accounts_file: "registered_accounts.txt"  # 注册成功账号的保存路径
+  accounts_file: "registered_accounts.txt"  # Đường dẫn lưu các tài khoản đã đăng ký thành công
