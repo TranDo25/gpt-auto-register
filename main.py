@@ -1,19 +1,19 @@
 """
-ChatGPT 账号自动注册脚本
-主程序入口
+Script tự động đăng ký tài khoản ChatGPT
+Điểm vào chương trình chính
 
-使用方法:
-    1. 修改 config.py 中的配置
-    2. 运行: python main.py
+Cách sử dụng:
+    1. Sửa đổi cấu hình trong config.py
+    2. Chạy: python main.py
 
-依赖安装:
+Cài đặt phụ thuộc:
     pip install undetected-chromedriver selenium requests
 
-功能:
-    - 自动创建临时邮箱（基于 cloudflare_temp_email）
-    - 自动完成 ChatGPT 注册流程
-    - 自动提取验证码
-    - 批量注册支持
+Chức năng:
+    - Tự động tạo email tạm thời (dựa trên cloudflare_temp_email)
+    - Tự động hoàn thành quy trình đăng ký ChatGPT
+    - Tự động trích xuất mã xác minh
+    - Hỗ trợ đăng ký hàng loạt
 """
 
 import time
@@ -38,139 +38,138 @@ from browser import (
 
 def register_one_account(monitor_callback=None):
     """
-    注册单个账号
-    :param monitor_callback: 回调函数 func(driver, step_name)，用于截图和中断检查
-    
-    返回:
-        tuple: (邮箱, 密码, 是否成功)
+    Đăng ký một tài khoản
+    :param monitor_callback: Hàm gọi lại func(driver, step_name), dùng để chụp ảnh màn hình và kiểm tra gián đoạn
+
+    Trả về:
+        tuple: (email, mật khẩu, có thành công không)
     """
     driver = None
     email = None
     password = None
     success = False
-    
-    # 辅助函数：执行回调
+
+    # Hàm trợ giúp: thực hiện gọi lại
     def _report(step_name):
         if monitor_callback and driver:
             monitor_callback(driver, step_name)
 
     try:
-        # 1. 创建临时邮箱
-        print("📧 正在创建临时邮箱...")
+        # 1. Tạo email tạm thời
+        print("📧 Đang tạo email tạm thời...")
         email, jwt_token = create_temp_email()
         if not email:
-            print("❌ 创建邮箱失败，终止注册")
+            print("❌ Lỗi tạo email, dừng đăng ký")
             return None, None, False
-        
-        # 2. 生成随机密码
+
+        # 2. Tạo mật khẩu ngẫu nhiên
         password = generate_random_password()
-        
-        # 3. 初始化浏览器
+
+        # 3. Khởi tạo trình duyệt
         driver = create_driver(headless=False)
         _report("init_browser")
-        
-        # 4. 打开注册页面
+
+        # 4. Mở trang đăng ký
         url = "https://chat.openai.com/chat"
-        print(f"🌐 正在打开 {url}...")
+        print(f"🌐 Đang mở {url}...")
         driver.get(url)
         time.sleep(3)
         _report("open_page")
-        
-        # 5. 填写注册表单（邮箱和密码）
+
+        # 5. Điền biểu mẫu đăng ký (email và mật khẩu)
         if not fill_signup_form(driver, email, password):
-            print("❌ 填写注册表单失败")
+            print("❌ Lỗi điền biểu mẫu đăng ký")
             return email, password, False
         _report("fill_form")
-        
-        # 6. 等待验证邮件
+
+        # 6. Chờ email xác minh
         time.sleep(5)
         verification_code = wait_for_verification_email(jwt_token)
-        
-        # 如果没有自动获取到验证码，提示手动输入
+
+        # Nếu không tự động nhận được mã xác minh, yêu cầu nhập thủ công
         if not verification_code:
-            print("⚠️ 未自动获取验证码，尝试请求用户输入...")
-            # 可以在这里扩展手动输入回调，暂略
-            # verification_code = input("⌨️ 请手动输入验证码: ").strip()
-        
+            print("⚠️ Không tự động nhận được mã xác minh, cố gắng yêu cầu người dùng nhập...")
+            # Có thể mở rộng gọi lại nhập thủ công ở đây, tạm thời bỏ qua
+
         if not verification_code:
-            print("❌ 未获取到验证码，终止注册")
+            print("❌ Không nhận được mã xác minh, dừng đăng ký")
             return email, password, False
-        
-        # 7. 输入验证码
+
+        # 7. Nhập mã xác minh
         if not enter_verification_code(driver, verification_code):
-            print("❌ 输入验证码失败")
+            print("❌ Lỗi nhập mã xác minh")
             return email, password, False
         _report("enter_code")
-        
-        # 8. 填写个人资料
+
+        # 8. Điền thông tin cá nhân
         if not fill_profile_info(driver):
-            print("❌ 填写个人资料失败")
+            print("❌ Lỗi điền thông tin cá nhân")
             return email, password, False
         _report("fill_profile")
-        
-        # 9. 保存账号信息 (注册成功)
-        save_to_txt(email, password, "已注册")
-        
-        # 10. 完成注册
+
+        # 9. Lưu thông tin tài khoản (đăng ký thành công)
+        save_to_txt(email, password, "Đã đăng ký")
+
+        # 10. Hoàn thành đăng ký
         print("\n" + "=" * 50)
-        print("🎉 注册成功！")
-        print(f"   邮箱: {email}")
-        print(f"   密码: {password}")
+        print("🎉 Đăng ký thành công!")
+        print(f"   Email: {email}")
+        print(f"   Mật khẩu: {password}")
         print("=" * 50)
-        
+
         success = True
-        print("⏳ 等待页面稳定...")
+        print("⏳ Chờ trang ổn định...")
         time.sleep(5)
         _report("registered")
-        
-        # 11. 开通 Plus 试用
-        print("\n" + "-" * 30)
-        print("🚀 开始开通 Plus 试用")
-        print("-" * 30)
-        
-        if subscribe_plus_trial(driver):
-            print("🎉 Plus 试用开通成功！")
-            update_account_status(email, "已开通Plus")
-            _report("plus_subscribed")
-            
-            # 12. 取消订阅 (防止扣费)
-            print("\n" + "-" * 30)
-            print("🛑 正在取消订阅...")
-            print("-" * 30)
-            
-            time.sleep(5)
-            if cancel_subscription(driver):
-                print("🎉 订阅已成功取消，流程完美结束！")
-                update_account_status(email, "已取消订阅")
-                _report("subscription_cancelled")
-            else:
-                print("⚠️ 订阅取消失败，请务必手动取消！")
-                update_account_status(email, "取消订阅失败")
-                _report("cancel_failed")
-        else:
-            print("⚠️ Plus 试用开通失败")
-            update_account_status(email, "Plus开通失败")
-            _report("plus_failed")
-            
-        success = True
-        time.sleep(5)
+
+        # # 11. Kích hoạt Plus trial (đã vô hiệu hóa - chỉ đăng ký tài khoản thường)
+        # print("\n" + "-" * 30)
+        # print("🚀 Bắt đầu kích hoạt Plus trial")
+        # print("-" * 30)
+        #
+        # if subscribe_plus_trial(driver):
+        #     print("🎉 Plus trial kích hoạt thành công!")
+        #     update_account_status(email, "Đã kích hoạt Plus")
+        #     _report("plus_subscribed")
+        #
+        #     # 12. Hủy đăng ký (ngăn chặn bị trừ tiền)
+        #     print("\n" + "-" * 30)
+        #     print("🛑 Đang hủy đăng ký...")
+        #     print("-" * 30)
+        #
+        #     time.sleep(5)
+        #     if cancel_subscription(driver):
+        #         print("🎉 Đăng ký đã hủy thành công, quy trình hoàn hảo!")
+        #         update_account_status(email, "Đã hủy đăng ký")
+        #         _report("subscription_cancelled")
+        #     else:
+        #         print("⚠️ Lỗi hủy đăng ký, vui lòng hủy thủ công!")
+        #         update_account_status(email, "Lỗi hủy đăng ký")
+        #         _report("cancel_failed")
+        # else:
+        #     print("⚠️ Lỗi kích hoạt Plus trial")
+        #     update_account_status(email, "Lỗi kích hoạt Plus")
+        #     _report("plus_failed")
+        #
+        # success = True
+        # time.sleep(5)
         
     except InterruptedError:
-        print("🛑 任务已被用户强制中断")
-        if email: update_account_status(email, "用户中断")
+        print("🛑 Tác vụ đã bị người dùng gián đoạn")
+        if email: update_account_status(email, "Người dùng gián đoạn")
         return email, password, False
-        
+
     except Exception as e:
-        print(f"❌ 发生错误: {e}")
-        # 即使出错也保存已有的账号信息（便于排查）
+        print(f"❌ Lỗi xảy ra: {e}")
+        # Ngay cả khi có lỗi cũng lưu thông tin tài khoản đã có (để dễ dàng kiểm tra)
         if email and password:
-            update_account_status(email, f"错误: {str(e)[:50]}")
-    
+            update_account_status(email, f"Lỗi: {str(e)[:50]}")
+
     finally:
         if driver:
-            print("🔒 正在关闭浏览器...")
+            print("🔒 Đang đóng trình duyệt...")
             driver.quit()
-    
+
     return email, password, success
     
 
@@ -178,59 +177,59 @@ def register_one_account(monitor_callback=None):
 
 def run_batch():
     """
-    批量注册账号
+    Đăng ký hàng loạt tài khoản
     """
     print("\n" + "=" * 60)
-    print(f"🚀 开始批量注册，目标数量: {TOTAL_ACCOUNTS}")
+    print(f"🚀 Bắt đầu đăng ký hàng loạt, mục tiêu: {TOTAL_ACCOUNTS}")
     print("=" * 60 + "\n")
 
-    print("\n⚠️  免责声明：本项目仅供学习研究使用。请勿用于商业用途或违规操作。")
-    print("⚠️  使用者需自行承担因违规使用导致的一切后果。\n")
+    print("\n⚠️  Tuyên bố miễn trừ: Dự án này chỉ dùng cho mục đích học tập và nghiên cứu. Vui lòng không sử dụng cho mục đích thương mại hoặc hoạt động vi phạm.")
+    print("⚠️  Người sử dụng cần tự chịu trách nhiệm về mọi hậu quả do sử dụng không đúng cách.\n")
     time.sleep(2)
-    
+
     success_count = 0
     fail_count = 0
     registered_accounts = []
-    
+
     for i in range(TOTAL_ACCOUNTS):
         print("\n" + "#" * 60)
-        print(f"📝 正在注册第 {i + 1}/{TOTAL_ACCOUNTS} 个账号")
+        print(f"📝 Đang đăng ký tài khoản thứ {i + 1}/{TOTAL_ACCOUNTS}")
         print("#" * 60 + "\n")
-        
+
         email, password, success = register_one_account()
-        
+
         if success:
             success_count += 1
             registered_accounts.append((email, password))
         else:
             fail_count += 1
-        
-        # 显示进度
+
+        # Hiển thị tiến trình
         print("\n" + "-" * 40)
-        print(f"📊 当前进度: {i + 1}/{TOTAL_ACCOUNTS}")
-        print(f"   ✅ 成功: {success_count}")
-        print(f"   ❌ 失败: {fail_count}")
+        print(f"📊 Tiến trình hiện tại: {i + 1}/{TOTAL_ACCOUNTS}")
+        print(f"   ✅ Thành công: {success_count}")
+        print(f"   ❌ Thất bại: {fail_count}")
         print("-" * 40)
-        
-        # 如果还有下一个，等待随机时间
+
+        # Nếu còn tài khoản tiếp theo, chờ thời gian ngẫu nhiên
         if i < TOTAL_ACCOUNTS - 1:
             wait_time = random.randint(BATCH_INTERVAL_MIN, BATCH_INTERVAL_MAX)
-            print(f"\n⏳ 等待 {wait_time} 秒后继续下一个注册...")
+            print(f"\n⏳ Chờ {wait_time} giây trước khi đăng ký tiếp theo...")
             time.sleep(wait_time)
-    
-    # 最终统计
+
+    # Thống kê cuối cùng
     print("\n" + "=" * 60)
-    print("🏁 批量注册完成")
+    print("🏁 Đăng ký hàng loạt hoàn thành")
     print("=" * 60)
-    print(f"   总计: {TOTAL_ACCOUNTS}")
-    print(f"   ✅ 成功: {success_count}")
-    print(f"   ❌ 失败: {fail_count}")
-    
+    print(f"   Tổng cộng: {TOTAL_ACCOUNTS}")
+    print(f"   ✅ Thành công: {success_count}")
+    print(f"   ❌ Thất bại: {fail_count}")
+
     if registered_accounts:
-        print("\n📋 成功注册的账号:")
+        print("\n📋 Các tài khoản đã đăng ký thành công:")
         for email, password in registered_accounts:
             print(f"   - {email}")
-    
+
     print("=" * 60)
 
 

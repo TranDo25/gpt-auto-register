@@ -1057,29 +1057,29 @@ def subscribe_plus_trial(driver):
         run_in_all_frames("填写地址", fill_address)
         time.sleep(1)
 
-        # ============== 4. 填写信用卡 ==============
-        print("💳 正在填写信用卡信息...")
-        card = CREDIT_CARD_INFO
-        
-        # 卡号
-        if not handle_stripe_input(driver, '卡号', 'input[name="cardnumber"], input[placeholder*="Card number"], input[placeholder*="0000"], input[autocomplete="cc-number"]', card["number"]):
-             print("❌ 卡号输入失败")
-        
-        time.sleep(1)
-        
-        # 有效期
-        if not handle_stripe_input(driver, '有效期', 
-            'input[name="exp-date"], input[name="expirationDate"], input[id="cardExpiry"], input[placeholder="MM / YY"], input[autocomplete="cc-exp"]', 
-            card["expiry"]):
-            print("❌ 有效期输入失败")
-            
-        time.sleep(1)
-        
-        # CVC
-        if not handle_stripe_input(driver, 'CVC', 'input[name="cvc"], input[name="securityCode"], input[id="cardCvc"], input[placeholder="CVC"]', card["cvc"]):
-             print("❌ CVC 输入失败")
-
-        time.sleep(2)
+        # ============== 4. 填写信用卡 (已禁用 - 仅注册普通账号) ==============
+        # print("💳 正在填写信用卡信息...")
+        # card = CREDIT_CARD_INFO
+        #
+        # # 卡号
+        # if not handle_stripe_input(driver, '卡号', 'input[name="cardnumber"], input[placeholder*="Card number"], input[placeholder*="0000"], input[autocomplete="cc-number"]', card["number"]):
+        #      print("❌ 卡号输入失败")
+        #
+        # time.sleep(1)
+        #
+        # # 有效期
+        # if not handle_stripe_input(driver, '有效期',
+        #     'input[name="exp-date"], input[name="expirationDate"], input[id="cardExpiry"], input[placeholder="MM / YY"], input[autocomplete="cc-exp"]',
+        #     card["expiry"]):
+        #     print("❌ 有效期输入失败")
+        #
+        # time.sleep(1)
+        #
+        # # CVC
+        # if not handle_stripe_input(driver, 'CVC', 'input[name="cvc"], input[name="securityCode"], input[id="cardCvc"], input[placeholder="CVC"]', card["cvc"]):
+        #      print("❌ CVC 输入失败")
+        #
+        # time.sleep(2)
         
         # ============== 5. 循环提交与补全 ==============
         def loop_submit_and_fix():
